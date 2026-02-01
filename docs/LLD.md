@@ -23,7 +23,7 @@ portfolio-generator/
 │   │   ├── layout.tsx            # Root layout with Clerk provider
 │   │   ├── page.tsx              # Landing page
 │   │   ├── globals.css
-│   │   │
+│   │   │LL
 │   │   ├── (auth)/               # Auth group (Clerk pages)
 │   │   │   ├── sign-in/[[...sign-in]]/page.tsx
 │   │   │   └── sign-up/[[...sign-up]]/page.tsx
