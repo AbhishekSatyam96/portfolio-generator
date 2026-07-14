@@ -1,20 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { StepIndicator } from "@/components/ui/step-indicator";
-import {
-  PersonalInfoForm,
-  type PersonalInfo,
-} from "@/components/forms/personal-info-form";
-import {
-  ExperienceForm,
-  type Experience,
-} from "@/components/forms/experience-form";
+import { PersonalInfoForm } from "@/components/forms/personal-info-form";
+import { ExperienceForm } from "@/components/forms/experience-form";
 import { SkillsForm } from "@/components/forms/skills-form";
-import { ProjectsForm, type Project } from "@/components/forms/projects-form";
+import { ProjectsForm } from "@/components/forms/projects-form";
+import { usePortfolioStore } from "@/lib/store";
 import {
   ArrowLeft,
   ArrowRight,
@@ -31,29 +25,27 @@ const STEPS = [
   { id: 4, name: "Projects", description: "Your work" },
 ];
 
-const initialPersonalInfo: PersonalInfo = {
-  fullName: "",
-  title: "",
-  email: "",
-  phone: "",
-  location: "",
-  linkedinUrl: "",
-  githubUrl: "",
-  summary: "",
-};
-
 export default function CreatePortfolioPage() {
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
 
-  // Form state
-  const [personalInfo, setPersonalInfo] =
-    useState<PersonalInfo>(initialPersonalInfo);
-  const [experiences, setExperiences] = useState<Experience[]>([]);
-  const [skills, setSkills] = useState<string[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
+  // Use Zustand store for state
+  const {
+    personalInfo,
+    setPersonalInfo,
+    experiences,
+    setExperiences,
+    skills,
+    setSkills,
+    projects,
+    setProjects,
+    currentStep,
+    setCurrentStep,
+    isGenerating,
+    setIsGenerating,
+    isSaving,
+    setIsSaving,
+    setGeneratedBio,
+  } = usePortfolioStore();
 
   const canGoNext = () => {
     switch (currentStep) {
@@ -91,11 +83,53 @@ export default function CreatePortfolioPage() {
 
   const handleGenerateAndPreview = async () => {
     setIsGenerating(true);
-    // TODO: Implement AI generation API calls
-    // This will call /api/ai/generate-bio and /api/ai/enhance-project
-    await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulated delay
-    setIsGenerating(false);
-    router.push("/preview");
+    try {
+      // Generate bio using AI
+      const bioResponse = await fetch("/api/ai/generate-bio", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          personalInfo,
+          experiences,
+          skills,
+        }),
+      });
+      const bioData = await bioResponse.json();
+      if (bioData.success) {
+        setGeneratedBio(bioData.bio);
+      }
+
+      // Enhance project descriptions
+      const enhancedProjects = await Promise.all(
+        projects.map(async (project) => {
+          const response = await fetch("/api/ai/enhance-project", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              project,
+              context: {
+                userTitle: personalInfo.title,
+                skills,
+              },
+            }),
+          });
+          const data = await response.json();
+          return {
+            ...project,
+            enhancedDescription: data.success
+              ? data.enhancedDescription
+              : project.description,
+          };
+        })
+      );
+      setProjects(enhancedProjects);
+
+      router.push("/preview");
+    } catch (error) {
+      console.error("Error generating content:", error);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleSaveDraft = async () => {

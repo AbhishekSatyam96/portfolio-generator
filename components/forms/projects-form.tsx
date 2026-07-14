@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import type { Project } from "@/types";
 import {
   Plus,
   Trash2,
@@ -15,14 +16,7 @@ import {
   GripVertical,
 } from "lucide-react";
 
-export interface Project {
-  id: string;
-  title: string;
-  description: string;
-  techStack: string[];
-  liveUrl: string;
-  githubUrl: string;
-}
+export type { Project };
 
 interface ProjectsFormProps {
   data: Project[];

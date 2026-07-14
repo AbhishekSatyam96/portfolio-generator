@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   HeroSection,
@@ -11,6 +10,7 @@ import {
   ProjectsSection,
   FooterSection,
 } from "@/components/portfolio";
+import { usePortfolioStore } from "@/lib/store";
 import {
   ArrowLeft,
   Edit3,
@@ -19,139 +19,40 @@ import {
   Smartphone,
   Copy,
   Check,
-  Share2,
   Loader2,
   Eye,
   Sparkles,
 } from "lucide-react";
 
-// Mock data - In production, this would come from your state management or API
-const mockPortfolioData = {
-  personalInfo: {
-    fullName: "Alex Johnson",
-    title: "Senior Full Stack Developer",
-    email: "alex@example.com",
-    phone: "+1 (555) 123-4567",
-    location: "San Francisco, CA",
-    linkedinUrl: "https://linkedin.com/in/alexjohnson",
-    githubUrl: "https://github.com/alexjohnson",
-    summary: "",
-  },
-  generatedBio:
-    "Alex Johnson is a Senior Full Stack Developer based in San Francisco with over 6 years of experience building scalable web applications. Specializing in React, Node.js, and cloud technologies, Alex has led development teams at fast-growing startups and delivered products used by millions of users. Passionate about clean code, performance optimization, and mentoring junior developers.",
-  experiences: [
-    {
-      id: "1",
-      company: "TechCorp Inc.",
-      role: "Senior Full Stack Developer",
-      startDate: "2022-01",
-      endDate: "",
-      isCurrent: true,
-      description: "Leading development of core platform features",
-      enhancedDescription:
-        "Spearheading the development of core platform features serving 2M+ active users. Architected a microservices migration that improved system reliability by 40% and reduced deployment time by 60%. Mentoring a team of 5 developers and establishing engineering best practices.",
-    },
-    {
-      id: "2",
-      company: "StartupXYZ",
-      role: "Full Stack Developer",
-      startDate: "2019-06",
-      endDate: "2021-12",
-      isCurrent: false,
-      description: "Built and maintained web applications",
-      enhancedDescription:
-        "Developed and maintained multiple customer-facing applications using React and Node.js. Implemented real-time features using WebSockets, improving user engagement by 35%. Collaborated with product and design teams to deliver features that increased user retention by 25%.",
-    },
-    {
-      id: "3",
-      company: "Digital Agency Co.",
-      role: "Frontend Developer",
-      startDate: "2018-01",
-      endDate: "2019-05",
-      isCurrent: false,
-      description: "Created responsive web interfaces",
-      enhancedDescription:
-        "Created responsive, accessible web interfaces for Fortune 500 clients. Introduced component-based architecture using React, reducing development time by 30%. Optimized frontend performance achieving 95+ Lighthouse scores across all projects.",
-    },
-  ],
-  skills: [
-    "JavaScript",
-    "TypeScript",
-    "React",
-    "Next.js",
-    "Node.js",
-    "Python",
-    "PostgreSQL",
-    "MongoDB",
-    "AWS",
-    "Docker",
-    "Kubernetes",
-    "GraphQL",
-    "REST APIs",
-    "Git",
-    "CI/CD",
-    "Agile",
-  ],
-  projects: [
-    {
-      id: "1",
-      title: "E-Commerce Platform",
-      description: "Full-stack e-commerce solution with real-time inventory",
-      enhancedDescription:
-        "Architected and developed a full-stack e-commerce platform handling 10,000+ daily transactions. Implemented real-time inventory management, reducing overselling incidents by 99%. Built with Next.js, Stripe integration, and PostgreSQL for robust data management.",
-      techStack: ["Next.js", "TypeScript", "PostgreSQL", "Stripe", "Redis"],
-      liveUrl: "https://example-ecommerce.com",
-      githubUrl: "https://github.com/alexjohnson/ecommerce",
-    },
-    {
-      id: "2",
-      title: "Task Management App",
-      description: "Collaborative project management tool",
-      enhancedDescription:
-        "Built a real-time collaborative task management application used by 50+ teams. Features include drag-and-drop kanban boards, time tracking, and automated reporting. Achieved 99.9% uptime with optimized WebSocket connections.",
-      techStack: ["React", "Node.js", "Socket.io", "MongoDB", "Docker"],
-      liveUrl: "https://example-tasks.com",
-      githubUrl: "https://github.com/alexjohnson/taskapp",
-    },
-    {
-      id: "3",
-      title: "AI Content Generator",
-      description: "ML-powered content creation tool",
-      enhancedDescription:
-        "Developed an AI-powered content generation platform integrating GPT models for marketing copy and blog posts. Implemented usage-based billing and rate limiting. Serves 1,000+ monthly active users with 98% satisfaction rate.",
-      techStack: ["Python", "FastAPI", "React", "OpenAI", "AWS"],
-      liveUrl: "https://example-ai.com",
-      githubUrl: "",
-    },
-    {
-      id: "4",
-      title: "Developer Portfolio Template",
-      description: "Open-source portfolio generator",
-      enhancedDescription:
-        "Created an open-source portfolio generator with AI-powered bio generation. Features customizable themes, SEO optimization, and one-click deployment. Garnered 500+ GitHub stars and active community contributions.",
-      techStack: ["Next.js", "Tailwind CSS", "Vercel", "MDX"],
-      liveUrl: "",
-      githubUrl: "https://github.com/alexjohnson/portfolio",
-    },
-  ],
-  isPublished: false,
-  username: "alexjohnson",
-};
-
 type ViewMode = "desktop" | "mobile";
 
 export default function PreviewPage() {
-  const router = useRouter();
   const [viewMode, setViewMode] = useState<ViewMode>("desktop");
   const [isPublishing, setIsPublishing] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
 
-  const portfolioUrl = `portfoliogen.com/p/${mockPortfolioData.username}`;
+  // Get data from store
+  const {
+    personalInfo,
+    experiences,
+    skills,
+    projects,
+    generatedBio,
+    isPublished,
+    username,
+    setIsPublished,
+  } = usePortfolioStore();
+
+  // Generate username from name if not set
+  const displayUsername =
+    username || personalInfo.fullName.toLowerCase().replace(/\s+/g, "") || "user";
+  const portfolioUrl = `portfoliogen.com/p/${displayUsername}`;
 
   const handlePublish = async () => {
     setIsPublishing(true);
-    // TODO: Implement publish API call
+    // TODO: Implement publish API call to save to database
     await new Promise((resolve) => setTimeout(resolve, 2000));
+    setIsPublished(true);
     setIsPublishing(false);
   };
 
@@ -278,28 +179,28 @@ export default function PreviewPage() {
           {/* Portfolio Content */}
           <div className={viewMode === "mobile" ? "overflow-hidden rounded-b-3xl" : ""}>
             <HeroSection
-              fullName={mockPortfolioData.personalInfo.fullName}
-              title={mockPortfolioData.personalInfo.title}
-              location={mockPortfolioData.personalInfo.location}
-              email={mockPortfolioData.personalInfo.email}
-              linkedinUrl={mockPortfolioData.personalInfo.linkedinUrl}
-              githubUrl={mockPortfolioData.personalInfo.githubUrl}
-              bio={mockPortfolioData.generatedBio}
+              fullName={personalInfo.fullName}
+              title={personalInfo.title}
+              location={personalInfo.location}
+              email={personalInfo.email}
+              linkedinUrl={personalInfo.linkedinUrl}
+              githubUrl={personalInfo.githubUrl}
+              bio={generatedBio || personalInfo.summary}
             />
 
-            <ExperienceSection experiences={mockPortfolioData.experiences} />
+            <ExperienceSection experiences={experiences} />
 
-            <SkillsSection skills={mockPortfolioData.skills} />
+            <SkillsSection skills={skills} />
 
-            <ProjectsSection projects={mockPortfolioData.projects} />
+            <ProjectsSection projects={projects} />
 
-            <FooterSection fullName={mockPortfolioData.personalInfo.fullName} />
+            <FooterSection fullName={personalInfo.fullName} />
           </div>
         </div>
       </div>
 
       {/* Bottom CTA Bar (for unpublished) */}
-      {!mockPortfolioData.isPublished && (
+      {!isPublished && (
         <div className="fixed bottom-0 left-0 right-0 border-t border-border/50 bg-background/80 backdrop-blur-lg">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
             <div>

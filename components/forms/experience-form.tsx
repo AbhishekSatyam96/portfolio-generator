@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import type { Experience } from "@/types";
 import {
   Plus,
   Trash2,
@@ -14,15 +14,7 @@ import {
   GripVertical,
 } from "lucide-react";
 
-export interface Experience {
-  id: string;
-  company: string;
-  role: string;
-  startDate: string;
-  endDate: string;
-  isCurrent: boolean;
-  description: string;
-}
+export type { Experience };
 
 interface ExperienceFormProps {
   data: Experience[];
