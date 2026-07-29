@@ -29,8 +29,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateB
       skills: skills?.join(", ") || "Not specified",
     });
 
-    // Generate bio using Claude
-    const bio = await generateWithClaude(prompt, 500);
+    // Generate bio using Claude (target output is 150-200 words; the rest of
+    // the budget is headroom for adaptive thinking)
+    const bio = await generateWithClaude(prompt, 2000);
 
     return NextResponse.json({
       success: true,

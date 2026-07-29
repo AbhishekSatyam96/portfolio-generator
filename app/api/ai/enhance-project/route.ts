@@ -29,8 +29,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<EnhancePr
       skills: context?.skills?.join(", ") || "Not specified",
     });
 
-    // Generate enhanced description using Claude
-    const enhancedDescription = await generateWithClaude(prompt, 300);
+    // Generate enhanced description using Claude (target output is 2-4
+    // sentences; the rest of the budget is headroom for adaptive thinking)
+    const enhancedDescription = await generateWithClaude(prompt, 1500);
 
     return NextResponse.json({
       success: true,
